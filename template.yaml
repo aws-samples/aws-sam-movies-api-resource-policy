@@ -1,0 +1,138 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: 'AWS::Serverless-2016-10-31'
+Description: Movies
+Globals:
+  Function:
+    Runtime: python2.7
+Resources:
+  # API
+  ApiGatewayApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      DefinitionBody:
+          'Fn::Transform':
+            Name: 'AWS::Include'
+            Parameters:
+              Location:
+                Fn::Sub: s3://aws-samples-sam-movies-example/swagger.yaml
+      StageName: v1
+
+  # IAM
+  CrudLambdaIAMRole:
+      Type: "AWS::IAM::Role"
+      Properties:
+          Path: "/"
+          AssumeRolePolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              -
+                Effect: "Allow"
+                Action:
+                  - "sts:AssumeRole"
+                Principal:
+                  Service:
+                    - "lambda.amazonaws.com"
+                    - "apigateway.amazonaws.com"
+  CrudLambdaPolicy:
+    Type: "AWS::IAM::Policy"
+    DependsOn: [CrudLambdaIAMRole]
+    Properties:
+      PolicyName: CrudLambdaPolicy
+      Roles: [!Ref CrudLambdaIAMRole]
+      PolicyDocument:
+        Statement:
+        - Effect: Allow
+          Action: [
+            "ec2:DescribeNetworkInterfaces",
+            "ec2:CreateNetworkInterface",
+            "ec2:DeleteNetworkInterface",
+            "dynamodb:BatchGetItem",
+            "dynamodb:BatchWriteItem",
+            "dynamodb:DeleteItem",
+            "dynamodb:GetItem",
+            "dynamodb:PutItem",
+            "dynamodb:Query",
+            "dynamodb:Scan",
+            "dynamodb:UpdateItem"
+
+          ]
+          Resource: ["*"]
+
+  # Lambda
+
+  GetRatings:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./build
+      Handler: movies.api.ratings.get_ratings
+      Role: !GetAtt CrudLambdaIAMRole.Arn
+      Environment:
+        Variables:
+          RATINGS_TABLE: !Ref RatingsTable
+      Events:
+        GetRatings:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ApiGatewayApi
+            Path: /ratings/{year}
+            Method: GET
+  CreateRating:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./build
+      Handler: movies.api.ratings.create_rating
+      Role: !GetAtt CrudLambdaIAMRole.Arn
+      Environment:
+        Variables:
+          RATINGS_TABLE: !Ref RatingsTable
+      Events:
+        CreateRating:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ApiGatewayApi
+            Path: /ratings/{year}
+            Method: POST
+  DeleteRating:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./build
+      Handler: movies.api.ratings.delete_rating
+      Role: !GetAtt CrudLambdaIAMRole.Arn
+      Environment:
+        Variables:
+          RATINGS_TABLE: !Ref RatingsTable
+      Events:
+        DeleteRating:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ApiGatewayApi
+            Path: /ratings/{year}/{title}
+            Method: DELETE
+
+  # Database
+  RatingsTable:
+    Type: "AWS::DynamoDB::Table"
+    Properties:
+      AttributeDefinitions:
+        -
+          AttributeName: "year"
+          AttributeType: "S"
+        -
+          AttributeName: "title"
+          AttributeType: "S"
+      KeySchema:
+        -
+          AttributeName: "year"
+          KeyType: "HASH"
+        -
+          AttributeName: "title"
+          KeyType: "RANGE"
+      ProvisionedThroughput:
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
+
+Outputs:
+  AwsApiId:
+    Value: !Ref ApiGatewayApi
+    

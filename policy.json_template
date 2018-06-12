@@ -1,0 +1,1 @@
+"{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\\\":\"Allow\",\"Principal\":{\"AWS\":[\"arn:aws:iam::s/account_idA/:user\\/user\",\"arn:aws:iam::s/account_idA/:root\"]},\"Action\":\"execute-api:Invoke\",\"Resource\":\"arn:aws:execute-api:us-east-1:account_idB:api_id\\/*\\/*\\/*\"}]}"

@@ -1,0 +1,247 @@
+swagger: "2.0"
+info:
+  description: "This is a sample API for rating movies."
+  version: "1.0.0"
+  title: "Movies API"
+tags:
+- name: "Movie Ratings"
+- name: "CORS"
+schemes:
+- "http"
+paths:
+  /ratings/{year}:
+    options:
+      tags:
+      - "CORS"
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - name: "year"
+        in: "path"
+        description: "Year of rating"
+        required: true
+        type: "integer"
+        format: "int64"
+      responses:
+        200:
+          description: 200 response
+          schema:
+            $ref: "#/definitions/Empty"
+          headers:
+            Access-Control-Allow-Origin:
+              type: string
+            Access-Control-Allow-Methods:
+              type: string
+            Access-Control-Allow-Headers:
+              type: string
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: 200
+            responseParameters:
+              method.response.header.Access-Control-Allow-Methods: "'DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+        passthroughBehavior: when_no_match
+        requestTemplates:
+          application/json: "{\"statusCode\": 200}"
+        type: mock
+    get:
+      tags:
+      - "Movie Ratings"
+      summary: "Return a list of movies from a given year"
+      x-amazon-apigateway-auth: 
+        type: aws_iam
+      produces:
+      - "application/json"
+      parameters:
+      - name: "year"
+        in: "path"
+        description: "Year of rating"
+        required: true
+        type: "integer"
+        format: "int64"
+      responses:
+        200:
+          description: "successful operation"
+          headers:
+            Access-Control-Allow-Headers:
+              type: string
+            Access-Control-Allow-Methods:
+              type: string
+            Access-Control-Allow-Origin:
+              type: string
+          schema:
+            $ref: "#/definitions/Ratings"
+        400:
+          description: "Invalid ID supplied"
+        404:
+          description: "year not found"
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: 200
+            responseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+        uri: 
+          Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GetRatings.Arn}/invocations"
+        passthroughBehavior: when_no_match
+        httpMethod: POST
+        type: aws_proxy
+    post:
+      tags:
+      - "Movie Ratings"
+      summary: "Add a new movie rating from a given year"
+      x-amazon-apigateway-auth: 
+        type: aws_iam
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "year"
+        in: "path"
+        required: true
+        type: "integer"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/Rating"
+      responses:
+        400:
+          description: "Invalid request"
+          headers:
+            Access-Control-Allow-Headers:
+              type: string
+            Access-Control-Allow-Methods:
+              type: string
+            Access-Control-Allow-Origin:
+              type: string
+        
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: 200
+            responseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+        uri: 
+          Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CreateRating.Arn}/invocations" 
+        passthroughBehavior: when_no_match
+        httpMethod: POST
+        type: aws_proxy
+  /ratings/{year}/{title}:
+    options:
+      tags:
+      - "CORS"
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - name: "year"
+        in: "path"
+        description: "The year of rating"
+        required: true
+        type: "integer"
+        format: "int64"
+      - name: "title"
+        in: "path"
+        description: "Name of the film reviewed"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: 200 response
+          schema:
+            $ref: "#/definitions/Empty"
+          headers:
+            Access-Control-Allow-Origin:
+              type: string
+            Access-Control-Allow-Methods:
+              type: string
+            Access-Control-Allow-Headers:
+              type: string
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: 200
+            responseParameters:
+              method.response.header.Access-Control-Allow-Methods: "'DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+        passthroughBehavior: when_no_match
+        requestTemplates:
+          application/json: "{\"statusCode\": 200}"
+        type: mock
+    delete:
+      tags:
+      - "Movie Ratings"
+      summary: "Delete a film rating"
+      x-amazon-apigateway-auth: 
+        type: aws_iam
+      description: ""
+      produces:
+      - "application/json"
+      parameters:
+      - name: "year"
+        in: "path"
+        description: "The year of rating"
+        required: true
+        type: "integer"
+        format: "int64"
+      - name: "title"
+        in: "path"
+        description: "Name of the film reviewed"
+        required: true
+        type: "string"
+      responses:
+        400:
+          description: "Invalid ID supplied"
+          headers:
+            Access-Control-Allow-Origin:
+              type: string
+            Access-Control-Allow-Methods:
+              type: string
+            Access-Control-Allow-Headers:
+              type: string
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: 200
+            responseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+        uri: 
+          Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${DeleteRating.Arn}/invocations"
+        passthroughBehavior: when_no_match
+        httpMethod: POST
+        type: aws_proxy
+definitions:
+  Empty:
+    type: object
+    title: Empty Schema
+  Rating:
+    type: "object"
+    required:
+    - "title"
+    - "rating"
+    properties:
+      title:
+        type: "string"
+      rating:
+        type: "integer"
+        format: "int64"
+  Ratings:
+    type: "object"
+    properties:
+      ratings:
+        type: "array"
+        items:
+          properties:
+            title:
+              type: "string"
+            rating:
+              type: "integer"
+              format: "int64"
