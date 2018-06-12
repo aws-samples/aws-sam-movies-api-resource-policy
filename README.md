@@ -8,7 +8,7 @@ This sample code is made available under a modified MIT license. See the LICENSE
 
 AM Movies API with APIGW Resource Policies
 
-###Pre-Requisites:
+### Pre-Requisites:
 
 aws-cli/1.15.0, jq-1.5, perl v5.18.2, python2.7
 
@@ -29,7 +29,7 @@ S3Bucket=""
 
 ```
 
-###Build and Deploy the movies API
+### Build and Deploy the movies API
 
 ```bash
 mkdir ./build
@@ -42,12 +42,12 @@ aws cloudformation deploy --template-file template-out.yaml --stack-name apigw-r
 ```
 
 
-###Get API ID after deployment
+### Get API ID after deployment
 ```bash
 API_ID=$(aws cloudformation describe-stacks --stack-name apigw-resource-policies-demo --query 'Stacks[0].Outputs[?OutputKey==`AwsApiId`].OutputValue' --output text)
 ```
 
-###Create APIGW Resource Policy from template and apply it to the newly created API
+### Create APIGW Resource Policy from template and apply it to the newly created API
 
 ```bash
 
