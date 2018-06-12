@@ -47,7 +47,7 @@ aws cloudformation deploy --template-file template-out.yaml --stack-name apigw-r
 API_ID=$(aws cloudformation describe-stacks --stack-name apigw-resource-policies-demo --query 'Stacks[0].Outputs[?OutputKey==`AwsApiId`].OutputValue' --output text)
 ```
 
-### Create APIGW Resource Policy from template and apply it to the newly created API
+### Create APIGW Resource Policy from template
 
 ```bash
 
@@ -61,6 +61,9 @@ perl -p -i -e "s/user/$userA/g" policy.json
 
 policy=`cat policy.json`
 
+```
+### Apply the resource policy to the API
+```bash
 aws apigateway update-rest-api --rest-api-id $API_ID --patch-operations op=replace,path=/policy,value="$policy"
 
 ```
