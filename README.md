@@ -27,8 +27,11 @@ userA=""
 #S3 Bucket where the SAM templates will live
 S3Bucket=""
 
-Deploy the movies API
+```
 
+###Build and Deploy the movies API
+
+```bash
 mkdir ./build
 cp -p -r ./movies ./build/movies
 pip install -r requirements.txt -t ./build
@@ -36,10 +39,17 @@ pip install -r requirements.txt -t ./build
 aws cloudformation package --template-file template.yaml --output-template-file template-out.yaml --s3-bucket $S3Bucket
 
 aws cloudformation deploy --template-file template-out.yaml --stack-name apigw-resource-policies-demo --capabilities CAPABILITY_IAM
+```
 
-Get API ID after deployment
 
+###Get API ID after deployment
+```bash
 API_ID=$(aws cloudformation describe-stacks --stack-name apigw-resource-policies-demo --query 'Stacks[0].Outputs[?OutputKey==`AwsApiId`].OutputValue' --output text)
+```
+
+###Create APIGW Resource Policy from template and apply it to the newly created API
+
+```bash
 
 cp policy.json_template policy.json
 
